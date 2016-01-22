@@ -1,0 +1,25 @@
+# compiler
+CC = gcc
+
+# compiler flags
+#   -g       | Add debug info to executable file
+#   -Wall    | Turn on most compiler warnings
+#   -std=c99 | Target version of C lang
+CFLAGS = -g -Wall -std=c99
+
+# post-compile flags
+#   -ledit | Needed for editfile library
+#   -lm    | Needed for MPC parser
+POSTFLAGS = -ledit -lm
+
+TARGET = prompt
+
+SRCS = prompt.c lval.c lenv.c builtin.c repl.c mpc/mpc.c
+
+all: $(TARGET)
+
+$(TARGET): $(TARGET).c
+	$(CC) $(CFLAGS) -o $(TARGET) $(SRCS) $(POSTFLAGS)
+
+clean:
+	$(RM) *o $(TARGET)
