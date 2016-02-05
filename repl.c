@@ -1,5 +1,7 @@
 #include "repl.h"
 
+lval* builtin_eval(lenv* e, lval* a);
+
 ///////////////////////////////////////////////////
 // READ
 lval* lval_read_num(mpc_ast_t* t)
@@ -67,13 +69,17 @@ lval* lval_eval_sexpr(lenv* e, lval* v)
   lval* f = lval_pop(v, 0);
   if (f->type != LVAL_FUN)
   {
+    lval* err = lval_err(
+      "S-Expression start with incorrect type."
+      "Got %s, Expected %s.",
+      ltype_name(f->type), ltype_name(LVAL_FUN));
     lval_del(f);
     lval_del(v);
-    return lval_err("First element of s-expression is not a function.");
+    return err;
   }
 
   // Call builtin with op
-  lval* result = f->builtin(e, v);
+  lval* result = lval_call(e, f, v);
   lval_del(f);
   return result;
 }
@@ -93,6 +99,43 @@ lval* lval_eval(lenv* e, lval* v)
 
   // All other types remain the same
   return v;
+}
+
+lval* lval_call(lenv* e, lval* f, lval* a)
+{
+  if (f->builtin)
+    return f->builtin(e, a);
+    
+  int given = a->count;
+  int total = f->formals->count;
+  
+  while (a->count)
+  {
+    if (f->formals->count == 0)
+    {
+      lval_del(a);
+      return lval_err(
+        "Function passed too many arguments. "
+        "Got %i, Expected %i.",
+        given, total);
+    }
+    
+    lval* sym = lval_pop(f->formals, 0);
+    lval* val = lval_pop(a, 0);
+    lenv_put(f->env, sym, val);
+    lval_del(sym);
+    lval_del(val);
+  }
+  
+  lval_del(a);
+  
+  if (f->formals->count == 0)
+  {
+    f->env->par = e;
+    return builtin_eval(f->env, lval_add(lval_sexpr(), lval_copy(f->body)));
+  }
+    
+  return lval_copy(f);
 }
 
 ///////////////////////////////////////////////////

@@ -8,8 +8,8 @@
 char* ltype_name(int t);
 
 // FYI...
-// 'if (!cond)'  was not working as expected.
-// 'if (!(cond))  fixed the issue
+// 'if (!cond)'    was not working as expected.
+// 'if (!(cond))'  fixed the issue
 
 #define LASSERT(args, cond, fmt, ...)         \
   if (!(cond))                                \

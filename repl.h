@@ -18,6 +18,7 @@ lval* lval_read(mpc_ast_t* t);
 // EVAL
 lval* lval_eval_sexpr(lenv* e, lval* v);
 lval* lval_eval(lenv* e, lval* v);
+lval* lval_call(lenv* e, lval* f, lval* a);
 
 ///////////////////////////////////////////////////
 // PRINT

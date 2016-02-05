@@ -3,6 +3,7 @@
 lenv* lenv_new(void)
 {
   lenv* e = malloc(sizeof(lenv));
+  e->par = NULL;
   e->count = 0;
   e->syms = NULL;
   e->vals = NULL;
@@ -30,6 +31,9 @@ lval* lenv_get(lenv* e, lval* k)
       return lval_copy(e->vals[i]);
   }
 
+  if (e->par)
+    return lenv_get(e->par, k);
+    
   return lval_err("Unbound symbol '%s'.", k->sym);
 }
 
@@ -71,4 +75,14 @@ lenv* lenv_copy(lenv* e)
   }
   
   return n;
+}
+
+void lenv_def(lenv* e, lval* k, lval* v)
+{
+  while (e->par)
+  {
+    e = e->par;
+  }
+  
+  lenv_put(e, k, v);
 }
